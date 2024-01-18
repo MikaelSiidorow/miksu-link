@@ -1,27 +1,57 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import QRCode from 'qrcode';
 	import { superForm } from 'sveltekit-superforms/client';
 	import type { PageData } from './$types';
 
 	export let data: PageData;
 
+	let codeData: string | null = null;
+
+	const generateQR = async (text: string) => {
+		try {
+			codeData = await QRCode.toDataURL(text);
+		} catch (err) {
+			console.error(err);
+		}
+	};
+
 	const { form, message, errors, constraints, enhance } = superForm(data.form);
 </script>
 
 {#if $page.url.searchParams.has('qr-code')}
-	<form class="w-full max-w-md space-y-4 p-4">
-		<div role="alert" class="alert alert-info w-full max-w-md">
-			<span>Coming soon!</span>
-		</div>
+	<form
+		class="w-full max-w-md space-y-4 p-4"
+		on:submit={(event) => {
+			event.preventDefault();
+			const formData = new FormData(event.currentTarget);
+			const inputUrlData = formData.get('url');
+			if (!inputUrlData) return;
+
+			console.log(inputUrlData);
+			generateQR(inputUrlData.toString());
+		}}
+	>
+		<noscript>
+			<div role="alert" class="alert alert-warning w-full max-w-md">
+				<span
+					>QR code generation only works with JavaScript enabled! We don't send any data to the
+					server, it's all done in your browser.
+				</span>
+			</div>
+		</noscript>
 
 		<div>
 			<label class="form-control w-full max-w-md">
 				<div class="label"><span class="label-text">URL</span></div>
-				<input class="input input-bordered w-full max-w-md" type="url" name="url" disabled />
+				<input class="input input-bordered w-full max-w-md" type="url" name="url" />
 			</label>
+			{#if codeData}
+				<img class="mx-auto p-4" src={codeData} alt="QR Code" />
+			{/if}
 		</div>
 
-		<button class="btn btn-primary w-full max-w-md" disabled type="submit">Create Code</button>
+		<button class="btn btn-primary w-full max-w-md" type="submit">Create Code</button>
 	</form>
 {:else}
 	<form class="w-full max-w-md space-y-4 p-4" method="post" use:enhance>
