@@ -28,7 +28,9 @@
 		</label>
 
 		<label class="form-control w-full max-w-xs">
-			<div class="label"><span class="label-text">Slug</span></div>
+			<div class="label">
+				<span class="label-text">Slug</span><span class="label-text-alt">(optional)</span>
+			</div>
 			<input
 				class="input input-bordered w-full max-w-xs"
 				type="text"

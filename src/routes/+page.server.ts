@@ -10,6 +10,11 @@ const schema = z.object({
 	slug: z.string().min(1).max(32).optional()
 });
 
+const generateSlug = () => {
+	const uuid = crypto.randomUUID();
+	return uuid.slice(0, 8);
+};
+
 export const load: PageServerLoad = async () => {
 	const form = await superValidate(schema);
 
@@ -26,7 +31,11 @@ export const actions: Actions = {
 
 		const { url, slug } = form.data;
 
-		console.log('Creating...', url, slug);
+		// check if slug is already in use
+
+		const pageSlug = slug ?? generateSlug();
+
+		console.log('Creating...', url, pageSlug);
 
 		return { form };
 	}
