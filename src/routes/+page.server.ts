@@ -1,5 +1,7 @@
+import { KV_REST_API_TOKEN, KV_REST_API_URL } from '$env/static/private';
 import { fail } from '@sveltejs/kit';
-import { superValidate } from 'sveltekit-superforms/server';
+import { createClient } from '@vercel/kv';
+import { message, setError, superValidate } from 'sveltekit-superforms/server';
 import { z } from 'zod';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -22,7 +24,7 @@ export const load: PageServerLoad = async () => {
 };
 
 export const actions: Actions = {
-	default: async ({ request }) => {
+	default: async ({ request, url: baseUrl }) => {
 		const form = await superValidate(request, schema);
 
 		if (!form.valid) {
@@ -31,12 +33,25 @@ export const actions: Actions = {
 
 		const { url, slug } = form.data;
 
-		// check if slug is already in use
+		const kv = createClient({
+			url: KV_REST_API_URL,
+			token: KV_REST_API_TOKEN
+		});
 
+		if (slug) {
+			const existingSlug = await kv.get(slug);
+			if (existingSlug) {
+				return setError(form, 'slug', 'Slug already in use');
+			}
+		}
 		const pageSlug = slug ?? generateSlug();
+		const result = await kv.set(pageSlug, url);
+		if (result !== 'OK') {
+			fail(500, { form });
+		}
 
-		console.log('Creating...', url, pageSlug);
+		const createdUrl = new URL(`/${pageSlug}`, baseUrl).toString();
 
-		return { form };
+		return message(form, createdUrl);
 	}
 };
