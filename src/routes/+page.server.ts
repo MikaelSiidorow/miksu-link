@@ -5,11 +5,21 @@ import { message, setError, superValidate } from 'sveltekit-superforms/server';
 import { z } from 'zod';
 import type { Actions, PageServerLoad } from './$types';
 
+// alphanumeric, dashes and underscores
+const allowedCharacters = 'abcdefghijklmnopqrstuvwxyz0123456789-_'.split('');
+
 const schema = z.object({
 	url: z.string().url().max(1000, {
 		message: 'Sorry, max length is 1000 characters'
 	}),
-	slug: z.string().min(1).max(32).optional()
+	slug: z
+		.string()
+		.min(1)
+		.max(32)
+		.refine((value) => value.split('').every((char) => allowedCharacters.includes(char)), {
+			message: 'Sorry, the slug can only contain alphanumberic characters, dashes and underscores'
+		})
+		.optional()
 });
 
 const generateSlug = () => {
