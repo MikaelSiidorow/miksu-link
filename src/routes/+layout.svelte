@@ -3,7 +3,7 @@
 	import '../app.css';
 </script>
 
-<main class="flex min-h-svh w-full flex-col items-center gap-4">
+<main class="flex min-h-svh w-full flex-col items-center gap-4 p-4">
 	<div class="flex w-full flex-1 flex-col items-center justify-center gap-4">
 		<h1 class="font-mono text-2xl">miksu-link</h1>
 		<div role="tablist" class="tabs tabs-bordered tabs-lg">
@@ -26,7 +26,7 @@
 		</div>
 		<slot />
 	</div>
-	<footer class="p-4">
+	<footer>
 		<a
 			class="link"
 			href="https://github.com/mikaelsiidorow/miksu-link"
