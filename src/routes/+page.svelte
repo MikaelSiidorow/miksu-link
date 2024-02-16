@@ -41,14 +41,17 @@
 			</div>
 		</noscript>
 
+		{#if codeData}
+			<div role="alert" class="alert alert-success w-full max-w-md">
+				<img src={codeData} alt="QR Code" />
+			</div>
+		{/if}
+
 		<div>
 			<label class="form-control w-full max-w-md">
 				<div class="label"><span class="label-text">URL</span></div>
 				<input class="input input-bordered w-full max-w-md" type="url" name="url" />
 			</label>
-			{#if codeData}
-				<img class="mx-auto p-4" src={codeData} alt="QR Code" />
-			{/if}
 		</div>
 
 		<button class="btn btn-primary w-full max-w-md" type="submit">Create Code</button>
