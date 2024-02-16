@@ -10,7 +10,12 @@
 
 	const generateQR = async (text: string) => {
 		try {
-			codeData = await QRCode.toDataURL(text);
+			codeData = await QRCode.toDataURL(text, {
+				errorCorrectionLevel: 'H',
+				type: 'image/png',
+				width: 300,
+				margin: 1
+			});
 		} catch (err) {
 			console.error(err);
 		}
