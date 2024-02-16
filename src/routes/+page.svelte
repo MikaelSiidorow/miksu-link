@@ -16,7 +16,7 @@
 		}
 	};
 
-	const { form, message, errors, constraints, enhance } = superForm(data.form);
+	const { form, message, errors, constraints, enhance, tainted, isTainted } = superForm(data.form);
 </script>
 
 {#if $page.url.searchParams.has('qr-code')}
@@ -127,6 +127,8 @@
 			</label>
 		</div>
 
-		<button class="btn btn-primary w-full max-w-md" type="submit">Shorten URL</button>
+		<button disabled={!isTainted($tainted)} class="btn btn-primary w-full max-w-md" type="submit"
+			>Shorten URL</button
+		>
 	</form>
 {/if}

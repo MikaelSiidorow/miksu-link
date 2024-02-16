@@ -2,6 +2,7 @@ import { KV_REST_API_TOKEN, KV_REST_API_URL } from '$env/static/private';
 import { fail } from '@sveltejs/kit';
 import { createClient } from '@vercel/kv';
 import { message, setError, superValidate } from 'sveltekit-superforms/server';
+import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -28,14 +29,14 @@ const generateSlug = () => {
 };
 
 export const load: PageServerLoad = async () => {
-	const form = await superValidate(schema);
+	const form = await superValidate(zod(schema));
 
 	return { form };
 };
 
 export const actions: Actions = {
 	default: async ({ request, url: baseUrl }) => {
-		const form = await superValidate(request, schema);
+		const form = await superValidate(request, zod(schema));
 
 		if (!form.valid) {
 			fail(400, { form });
