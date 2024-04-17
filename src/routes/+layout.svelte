@@ -1,6 +1,12 @@
 <script lang="ts">
+	import { dev } from '$app/environment';
 	import { page } from '$app/stores';
+	import { injectSpeedInsights } from '@vercel/speed-insights/sveltekit';
+	import { inject } from '@vercel/analytics';
 	import '../app.css';
+
+	inject({ mode: dev ? 'development' : 'production' });
+	injectSpeedInsights();
 </script>
 
 <main class="flex min-h-svh w-full flex-col items-center gap-4 p-4">
