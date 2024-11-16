@@ -4,9 +4,13 @@
 	import { superForm } from 'sveltekit-superforms/client';
 	import type { PageData } from './$types';
 
-	export let data: PageData;
+	interface Props {
+		data: PageData;
+	}
 
-	let codeData: string | null = null;
+	let { data }: Props = $props();
+
+	let codeData: string | null = $state(null);
 
 	const generateQR = async (text: string) => {
 		try {
@@ -27,7 +31,7 @@
 {#if $page.url.searchParams.has('qr-code')}
 	<form
 		class="w-full max-w-md space-y-4 p-4"
-		on:submit={(event) => {
+		onsubmit={(event) => {
 			event.preventDefault();
 			const formData = new FormData(event.currentTarget);
 			const inputUrlData = formData.get('url');
@@ -53,7 +57,7 @@
 					<button
 						class="btn btn-square"
 						type="button"
-						on:click={() => {
+						onclick={() => {
 							if (!codeData) return;
 
 							const a = document.createElement('a');
@@ -106,7 +110,7 @@
 					<button
 						class="btn btn-square"
 						type="button"
-						on:click={() => $message && navigator.clipboard.writeText($message)}
+						onclick={() => $message && navigator.clipboard.writeText($message)}
 					>
 						<span class="sr-only">Copy to clipboard</span>
 						<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24"

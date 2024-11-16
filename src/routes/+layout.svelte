@@ -5,6 +5,12 @@
 	import { inject } from '@vercel/analytics';
 	import '../app.css';
 
+	interface Props {
+		children?: import('svelte').Snippet;
+	}
+
+	let { children }: Props = $props();
+
 	inject({ mode: dev ? 'development' : 'production' });
 	injectSpeedInsights();
 </script>
@@ -30,7 +36,7 @@
 				class:tab-active={$page.url.searchParams.has('qr-code')}>QR Code</a
 			>
 		</div>
-		<slot />
+		{@render children?.()}
 	</div>
 	<footer>
 		<a
