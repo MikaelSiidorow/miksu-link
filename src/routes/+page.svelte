@@ -128,8 +128,8 @@
 		{/if}
 
 		<div>
-			<label class="form-control w-full max-w-md">
-				<div class="label"><span class="label-text">URL</span></div>
+			<fieldset class="fieldset w-full max-w-md">
+				<legend class="fieldset-legend"><span class="label-text">URL</span></legend>
 				<input
 					class="input input-bordered w-full max-w-md"
 					type="url"
@@ -139,16 +139,16 @@
 					{...$constraints.url}
 				/>
 				{#if $errors.url}
-					<div class="label">
+					<div class="fieldset-label">
 						<span class="label-text-alt text-error">{$errors.url}</span>
 					</div>
 				{/if}
-			</label>
+			</fieldset>
 
-			<label class="form-control w-full max-w-md">
-				<div class="label">
+			<fieldset class="fieldset w-full max-w-md">
+				<legend class="fieldset-legend">
 					<span class="label-text">Slug</span><span class="label-text-alt">(optional)</span>
-				</div>
+				</legend>
 				<input
 					class="input input-bordered w-full max-w-md"
 					type="text"
@@ -158,11 +158,11 @@
 					{...$constraints.slug}
 				/>
 				{#if $errors.slug}
-					<div class="label">
+					<div class="fieldset-label">
 						<span class="label-text-alt text-error">{$errors.slug}</span>
 					</div>
 				{/if}
-			</label>
+			</fieldset>
 		</div>
 
 		<button disabled={!isTainted($tainted)} class="btn btn-primary w-full max-w-md" type="submit"
