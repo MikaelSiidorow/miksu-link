@@ -11,15 +11,82 @@
 	let { data }: Props = $props();
 
 	let codeData: string | null = $state(null);
+	let centerEmoji: string = $state('');
+	let centerImage: File | null = $state(null);
 
 	const generateQR = async (text: string) => {
 		try {
-			codeData = await QRCode.toDataURL(text, {
+			// Generate base QR code
+			const baseQR = await QRCode.toDataURL(text, {
 				errorCorrectionLevel: 'H',
 				type: 'image/png',
 				width: 300,
 				margin: 1
 			});
+
+			// If no emoji or image, just use the base QR code
+			if (!centerEmoji && !centerImage) {
+				codeData = baseQR;
+				return;
+			}
+
+			// Create canvas to overlay emoji/image
+			const canvas = document.createElement('canvas');
+			const ctx = canvas.getContext('2d');
+			if (!ctx) return;
+
+			// Load base QR code image
+			const qrImage = new Image();
+			await new Promise<void>((resolve, reject) => {
+				qrImage.onload = () => resolve();
+				qrImage.onerror = reject;
+				qrImage.src = baseQR;
+			});
+
+			canvas.width = qrImage.width;
+			canvas.height = qrImage.height;
+
+			// Draw QR code
+			ctx.drawImage(qrImage, 0, 0);
+
+			// Calculate center position and size for overlay
+			const centerSize = Math.floor(qrImage.width * 0.3); // 30% of QR code size
+			const centerX = (qrImage.width - centerSize) / 2;
+			const centerY = (qrImage.height - centerSize) / 2;
+
+			// Draw white background circle for better contrast
+			ctx.fillStyle = 'white';
+			ctx.beginPath();
+			ctx.arc(qrImage.width / 2, qrImage.height / 2, centerSize / 2 + 5, 0, 2 * Math.PI);
+			ctx.fill();
+
+			if (centerEmoji) {
+				// Draw emoji in center
+				ctx.font = `${centerSize}px Arial`;
+				ctx.textAlign = 'center';
+				ctx.textBaseline = 'middle';
+				ctx.fillText(centerEmoji, qrImage.width / 2, qrImage.height / 2);
+			} else if (centerImage) {
+				// Draw uploaded image in center
+				const imgElement = new Image();
+				await new Promise<void>((resolve, reject) => {
+					imgElement.onload = () => resolve();
+					imgElement.onerror = reject;
+					imgElement.src = URL.createObjectURL(centerImage);
+				});
+
+				// Draw image with circular clipping
+				ctx.save();
+				ctx.beginPath();
+				ctx.arc(qrImage.width / 2, qrImage.height / 2, centerSize / 2, 0, 2 * Math.PI);
+				ctx.clip();
+				ctx.drawImage(imgElement, centerX, centerY, centerSize, centerSize);
+				ctx.restore();
+
+				URL.revokeObjectURL(imgElement.src);
+			}
+
+			codeData = canvas.toDataURL('image/png');
 		} catch (err) {
 			console.error(err);
 		}
@@ -87,6 +154,64 @@
 			<label class="form-control w-full max-w-md">
 				<div class="label"><span class="label-text">URL</span></div>
 				<input class="input input-bordered w-full max-w-md" type="url" name="url" />
+			</label>
+		</div>
+
+		<div class="divider">Customize (optional)</div>
+
+		<div>
+			<label class="form-control w-full max-w-md">
+				<div class="label">
+					<span class="label-text">Center Emoji</span>
+					<span class="label-text-alt">(e.g., ❤️, 🔗, 🎉)</span>
+				</div>
+				<input
+					class="input input-bordered w-full max-w-md"
+					type="text"
+					placeholder="Paste an emoji here"
+					maxlength="2"
+					bind:value={centerEmoji}
+					oninput={() => {
+						if (centerEmoji) centerImage = null;
+					}}
+				/>
+			</label>
+		</div>
+
+		<div class="divider">OR</div>
+
+		<div>
+			<label class="form-control w-full max-w-md">
+				<div class="label">
+					<span class="label-text">Center Image</span>
+					<span class="label-text-alt">(PNG, JPG, SVG)</span>
+				</div>
+				<input
+					class="file-input file-input-bordered w-full max-w-md"
+					type="file"
+					accept="image/*"
+					onchange={(e) => {
+						const files = e.currentTarget.files;
+						if (files && files.length > 0) {
+							centerImage = files[0];
+							centerEmoji = '';
+						}
+					}}
+				/>
+				{#if centerImage}
+					<div class="label">
+						<span class="label-text-alt">Selected: {centerImage.name}</span>
+						<button
+							type="button"
+							class="label-text-alt link link-error"
+							onclick={() => {
+								centerImage = null;
+							}}
+						>
+							Clear
+						</button>
+					</div>
+				{/if}
 			</label>
 		</div>
 
